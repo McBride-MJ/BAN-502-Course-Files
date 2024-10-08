@@ -1,0 +1,66 @@
+---
+output:
+  word_document: default
+  html_document: default
+---
+##R Studio Refresher Assignment 
+##Michelle McBride BAN 502 Aug 2024
+
+```{r}
+library(tidyverse)
+```
+
+##Number of Rows and Columns in Diamond Dataframe
+
+```{r}
+diamonddata=diamonds
+nrow(diamonddata)
+ncol(diamonddata)
+```
+
+##Question 1 & 2: There are 53,940 rows and 10 columns in the data frame. 
+
+```{r}
+ggplot(data=diamonddata,aes(x=carat,y=price))+
+  geom_point()
+```
+##Question 3: As the carats increase, so does the price. 
+
+```{r}
+ggplot(data=diamonddata,aes(x=carat,y=price, color=cut))+
+  geom_point()
+```
+##As cut increases, price does not change. 
+
+```{r}
+ggplot(data=diamonddata,aes(x=carat,y=price, color=cut))+
+  geom_point()+
+  facet_grid(color~.)
+```
+## Question 5: Faceting provided a seperate plot for each color. 
+
+```{r}
+library(readr)
+Inventory <- read_csv("InventoryData.csv")
+mean(Inventory$`On Hand`)
+```
+
+##Question 6: In the inventory data frame supplier is a character. 
+##Question 7: The mean of On Hand is 100.5373
+
+```{r}
+InventoryA <-Inventory%>%
+  filter(Supplier=="A")
+```
+
+```{r}
+InventoryA=mutate(InventoryA,OnHandRatio=`On Hand`/`Annual Demand`)
+```
+
+```{r}
+Avg_Cost<-InventoryA%>%group_by(`Item SKU`)%>%
+  summarise(SKUAvgCost=mean(`Cost per Unit ($)`),.groups = 'drop')%>%
+  as.data.frame()
+```
+
+##Question 10: Avg cost of 011 is 12.33000

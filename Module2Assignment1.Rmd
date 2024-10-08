@@ -1,0 +1,92 @@
+---
+title: "Module2Assignment1"
+author: "Michelle McBride"
+date: "2024-09-06"
+output: word_document
+---
+
+```{r}
+install.packages("tidymodels")
+library(tidyverse)
+library(tidymodels)
+install.packages("GGally")
+install.packages("lmtest")
+library(GGally)
+library(lmtest)
+```
+
+```{r}
+air = airquality
+summary(air)
+```
+
+#Summarize data and find variables with missing data
+
+```{r}
+air2= na.omit(air)
+```
+
+#Remove rows with NA
+
+```{r}
+install.packages("GGally")
+library("GGally")
+ggpairs(air2)
+```
+
+#Vizualization of the relationship of the dataset to show correlation values for the combination of variables
+
+```{r}
+ggcorr(air2,label=TRUE)
+```
+
+#Correlation matrix to show relationships
+
+```{r}
+ggplot(data=air2,aes(x=Temp,y=Ozone))+
+  geom_point()
+```
+
+#There is a postive correlation between temperature and ozone. As temp increases, ozone increases. 
+
+```{r}
+library(tidymodels)
+Reg_Model = recipe(Ozone ~ Temp,air2)
+
+lm_model = #give the model type a name 
+  linear_reg() %>% #specify that we are doing linear regression
+  set_engine("lm") #specify the specify type of linear tool we want to use 
+
+lm_wflow = 
+  workflow() %>% 
+  add_model(lm_model) %>% 
+  add_recipe(Reg_Model)
+
+lm_fit = fit(lm_wflow, air2)
+```
+
+
+```{r}
+summary(lm_fit$fit$fit$fit)
+```
+
+```{r}
+testdata = data.frame(Temp = 80)
+predict(lm_fit, new_data = testdata)
+```
+
+```{r}
+confint(lm_fit$fit$fit$fit)
+```
+
+
+```{r}
+install.packages("lmtest")
+library(lmtest)
+```
+
+
+```{r}
+dwtest(lm_fit$fit$fit$fit)
+```
+

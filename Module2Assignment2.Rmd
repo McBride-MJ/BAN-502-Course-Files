@@ -1,0 +1,139 @@
+---
+title: "Module2Assignment2"
+author: "Michelle McBride"
+date: "2024-09-06"
+output:
+  word_document: default
+  html_document:
+    df_print: paged
+---
+```{r}
+library(readr)
+bike_cleaned_3 <- read_csv("bike_cleaned-3.csv")
+bike=bike_cleaned_3
+
+library(tidyverse)
+bike=bike%>%mutate(dteday=mdy(dteday))
+
+bike=bike%>%mutate_if(is.character,as_factor)
+
+bike=bike%>%mutate(hr = as.factor(hr))
+```
+
+
+```{rcormatrix}
+
+```
+
+## Question 1: Temp has the highest coorelation 
+
+```{rcormatrix}
+ggpairs(bike, columns = c("windspeed", "hum","atemp", "temp","count"))
+```
+
+## Temp is still the most strongly coorelated
+
+```{r}
+ggplot(bike,aes(x=hr,y=count)) + geom_boxplot()
+```
+
+
+```{r}
+ggplot(bike,aes(x=season,y=count)) + geom_boxplot()
+```
+
+## Question 2: Summer has the highest count of rides. 
+
+## Build model to predit how hour affects count
+```{rmodelbuild}
+bike_recipe=recipe(count~hr,bike)
+
+lm_model = #give the model type a name 
+  linear_reg() %>% #specify that we are doing linear regression
+  set_engine("lm") #specify the specify type of linear tool we want to use 
+
+lm_wflow = 
+  workflow() %>% 
+  add_model(lm_model) %>% 
+  add_recipe(bike_recipe)
+
+lm_fit = fit(lm_wflow, bike)
+
+summary(lm_fit$fit$fit$fit)
+```
+
+#Question 3: There are 22 dummy variables. 
+#Question 4: Hour 0 is the base level category - it does not have a slope in the model. 
+#Question 5: Hour 17 has the highest number of rides. 
+
+```{r}
+ggplot(bike, aes(x=temp, y=count)) + geom_point()
+```
+
+
+#Question 6: The scatterplot suggests that as temp increases so does the number of rides. 
+
+#Now use a linear regression model with multiple variables and modify the original recipe to do it. 
+```{rbikerecipe2}
+bike2_recipe = recipe(count ~ hr + temp, bike)
+
+lm_model = #give the model type a name 
+  linear_reg() %>% #specify that we are doing linear regression
+  set_engine("lm") #specify the specify type of linear tool we want to use 
+
+lm_wflow = 
+  workflow() %>% 
+  add_model(lm_model) %>% 
+  add_recipe(bike2_recipe)
+
+lm_fit2 = fit(lm_wflow, bike)
+
+summary(lm_fit2$fit$fit$fit)
+```
+
+#Question 7: slope of hr23 is 31.748
+#Question 8: 0.5891
+
+```{rbikerecipe3}
+bike3_recipe = recipe(count ~ temp + atemp, bike)
+
+lm_model = #give the model type a name 
+  linear_reg() %>% #specify that we are doing linear regression
+  set_engine("lm") #specify the specify type of linear tool we want to use 
+
+lm_wflow = 
+  workflow() %>% 
+  add_model(lm_model) %>% 
+  add_recipe(bike3_recipe)
+
+lm_fit2 = fit(lm_wflow, bike)
+
+summary(lm_fit2$fit$fit$fit)
+```
+
+#Question 9: 0.1639
+#Question 10: Both temp and atemp are significant 
+#Question 11: 
+
+```{r}
+bike4=bike %>% dplyr::select("count","season","mnth","hr","holiday","weekday","workingday","weathersit","temp","atemp","hum","windspeed")
+```
+
+```{r}
+allmod = lm(count ~., bike4) #use the ~. to include all predictors rather than typing them all in
+summary(allmod)
+
+emptymod = lm(count ~1, bike4) #use ~1 to build an empty model 
+summary(emptymod)
+```
+
+#Question 12: Weekday and holiday make up workday and so NA appears in the analysis.
+
+#backward stepwise
+```{rbackstep}
+#backward
+backmod = stepAIC(allmod, direction = "backward", trace = TRUE) #trace = TRUE shows how the model is built (which variables are removed)
+summary(backmod)
+```
+
+# Questoin 13: Workingday is removed in the backward stepwise
